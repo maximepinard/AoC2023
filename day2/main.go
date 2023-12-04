@@ -14,19 +14,6 @@ import (
 	"strings"
 )
 
-// Game represents a game with rounds
-type Game struct {
-	Name   string
-	Rounds []Round
-}
-
-// Round represents a round in a game with counts of items
-type Round struct {
-	Red   int
-	Green int
-	Blue  int
-}
-
 func readFile() string {
 	fileContent, err := os.ReadFile("puzzle.txt")
 	if err != nil {
