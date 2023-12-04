@@ -68,7 +68,45 @@ func partOne() {
 }
 
 func partTwo() {
+	fileContent := readFile()
 
+	// Split the lines
+	fc := strings.Replace(fileContent, "  ", " ", -1)
+	rows := strings.Split(fc, "\n")
+	stackCards := []int{}
+
+	for i := 0; i < len(rows); i++ {
+		stackCards = append(stackCards, 1)
+	}
+
+	for index, row := range rows {
+		cards := strings.Split(row, ": ")
+		card := strings.Split(cards[1], " | ")
+
+		winningNumbers := strings.Fields(card[0])
+		gotNumbers := strings.Fields(card[1])
+
+		/* fmt.Printf("\nWinning Numbers: %v\n", winningNumbers)
+		fmt.Printf("Got Numbers: %v\n", gotNumbers) */
+		val := 0
+		for _, wn := range winningNumbers {
+			for _, gn := range gotNumbers {
+				if gn == wn {
+					val++
+					//fmt.Printf("--- %s --- %d \n", gn, val)
+				}
+			}
+		}
+		for k := 1; k <= val; k++ {
+			stackCards[index+k] += stackCards[index]
+		}
+	}
+	total := 0
+	//fmt.Println(stackCards)
+	for i := 0; i < len(stackCards); i++ {
+		total += stackCards[i]
+	}
+	fmt.Println(total)
 }
 
 func main() {
