@@ -1,8 +1,6 @@
 /**
 Advent of Code 2023
 Maxime PINARD
-using go
-I am late to the party - made the 03/12/2023
 */
 
 package main
@@ -11,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"testing"
 )
 
 func readFile() string {
@@ -33,7 +32,7 @@ func findInRow(row string, start int, end int) bool {
 	return false
 }
 
-func partOne() {
+func partOne(print bool) {
 	fileContent := readFile()
 
 	// Split the lines
@@ -64,10 +63,12 @@ func partOne() {
 		}
 		total += val
 	}
-	fmt.Println(total)
+	if print {
+		fmt.Println(total)
+	}
 }
 
-func partTwo() {
+func partTwo(print bool) {
 	fileContent := readFile()
 
 	// Split the lines
@@ -106,10 +107,38 @@ func partTwo() {
 	for i := 0; i < len(stackCards); i++ {
 		total += stackCards[i]
 	}
-	fmt.Println(total)
+	if print {
+		fmt.Println(total)
+	}
 }
 
 func main() {
-	partOne()
-	partTwo()
+	partOne(true)
+	partTwo(true)
+
+	res1 := testing.Benchmark(BenchmarkPartOne)
+	fmt.Printf("Memory allocations : %d \n", res1.MemAllocs)
+	fmt.Printf("Number of bytes allocated: %d \n", res1.Bytes)
+	fmt.Printf("Number of run: %d \n", res1.N)
+	fmt.Printf("Time taken: %s \n", res1.T)
+	fmt.Printf("Time taken per run: %f \n", res1.T.Seconds()/float64(res1.N))
+
+	res2 := testing.Benchmark(BenchmarkPartTwo)
+	fmt.Printf("Memory allocations : %d \n", res2.MemAllocs)
+	fmt.Printf("Number of bytes allocated: %d \n", res2.Bytes)
+	fmt.Printf("Number of run: %d \n", res2.N)
+	fmt.Printf("Time taken: %s \n", res2.T)
+	fmt.Printf("Time taken per run: %f \n", res2.T.Seconds()/float64(res2.N))
+}
+
+func BenchmarkPartOne(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		partOne(false)
+	}
+}
+
+func BenchmarkPartTwo(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		partTwo(false)
+	}
 }
