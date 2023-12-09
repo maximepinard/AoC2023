@@ -32,7 +32,7 @@ func ReplaceDigitStringByInt(fileString string) {
 	stringToReplace := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
 	for index, s := range stringToReplace {
 		convert := strconv.Itoa(index + 1) // convert the index [1] of two => [1] + 1 to string
-		firstChar := string(s[0])          // seven = s7n so that sevenine = s7nine is to not break merge of two digit strings
+		firstChar := string(s[0])          // seven = s7n so that sevenine = s7nine don't break when two digit strings are merged
 		lastChar := string(s[len(s)-1])
 		replace := firstChar + convert + lastChar
 		fileString = strings.ReplaceAll(fileString, s, replace)
