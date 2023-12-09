@@ -48,7 +48,7 @@ type Row struct {
 	currentLength = len(numbers)
 } */
 
-func partOne() {
+func partOne(reverse bool) {
 	fileContent := readFile()
 
 	// Split the lines
@@ -59,6 +59,7 @@ func partOne() {
 	rows := strings.Split(modifiedString, "\n")
 	var Matrixs []Matrix
 	CurrentMatrix := Matrix{}
+	// Read and parse
 	for _, row := range rows {
 		CurrentMatrix = Matrix{}
 		numbers := strings.Split(row, " ")
@@ -73,6 +74,7 @@ func partOne() {
 		Matrixs = append(Matrixs, CurrentMatrix)
 	}
 	var NewMatrixs []Matrix
+	// Recreate history
 	for _, CurrentMatrix := range Matrixs {
 		index := 0
 		for {
@@ -88,33 +90,46 @@ func partOne() {
 			if all0 == false {
 				CurrentMatrix.Rows = append(CurrentMatrix.Rows, newRow)
 			} else {
-				newRow = Row{}
-				for i := 0; i < len(row.nums)-1; i++ {
-					newRow.nums = append(newRow.nums, 0)
-				}
-				CurrentMatrix.Rows = append(CurrentMatrix.Rows, newRow)
 				break
 			}
 			index++
 		}
 		NewMatrixs = append(NewMatrixs, CurrentMatrix)
 	}
-	fmt.Println(NewMatrixs)
+	// Calculate new column and Add them up
+	//fmt.Println(NewMatrixs)
 	Total := 0
 	for _, CurrentMatrix := range NewMatrixs {
 		lastAdd := 0
-		for _, row := range CurrentMatrix.Rows {
+		for in := len(CurrentMatrix.Rows) - 1; in >= 0; in-- {
+			row := CurrentMatrix.Rows[in]
 			lastIndex := len(row.nums) - 1
-			lastAdd += row.nums[lastIndex]
+			if reverse == true {
+				lastIndex = 0
+				lastAdd = row.nums[lastIndex] - lastAdd
+			} else {
+				lastAdd += row.nums[lastIndex]
+			}
+			//fmt.Printf("row %d is num %d equal %d\n", in, row.nums[lastIndex], lastAdd)
 		}
-		fmt.Printf("last number is %d\n", lastAdd)
+		//fmt.Printf("last number is %d\n", lastAdd)
 		Total += lastAdd
 	}
-	fmt.Printf("Part 1: The Total is %d\n", Total)
+	if reverse == true {
+		fmt.Printf("Part 2: The Total is %d\n", Total)
+	} else {
+		fmt.Printf("Part 1: The Total is %d\n", Total)
+	}
+}
+
+func partTwo() {
+	reverse := true
+	partOne(reverse)
 }
 
 func main() {
-	partOne()
-	// partTwo()
+	reverse := false
+	partOne(reverse)
+	partTwo()
 	return
 }
