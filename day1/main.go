@@ -1,11 +1,3 @@
-/**
-Advent of Code 2023
-Maxime PINARD
-Using go for the first time
-I am late to the party - made the 03/12/2023
-Remade the 09/12/2023, trying have a readable, optimized and short code
-*/
-
 package main
 
 import (

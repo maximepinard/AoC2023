@@ -1,10 +1,3 @@
-/**
-Advent of Code 2023
-Maxime PINARD
-using go
-I am late to the party - made the 03/12/2023
-*/
-
 package main
 
 import (

@@ -1,8 +1,3 @@
-/**
-Advent of Code 2023
-Maxime PINARD
-*/
-
 package main
 
 import (
