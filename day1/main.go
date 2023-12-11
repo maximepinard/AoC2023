@@ -20,7 +20,7 @@ func AddFirstAndLastDigit(fileString string, part int) {
 	fmt.Printf("Part %d is %d\n", part, result)
 }
 
-func ReplaceDigitStringByInt(fileString string) {
+func ReplaceDigitStringByInt(fileString string) string {
 	stringToReplace := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
 	for index, s := range stringToReplace {
 		convert := strconv.Itoa(index + 1) // convert the index [1] of two => [1] + 1 to string
@@ -29,14 +29,13 @@ func ReplaceDigitStringByInt(fileString string) {
 		replace := firstChar + convert + lastChar
 		fileString = strings.ReplaceAll(fileString, s, replace)
 	}
-	AddFirstAndLastDigit(fileString, 2)
+	return fileString
 }
 
 func main() {
 	fileContent, _ := os.ReadFile("input.txt")
 	fileString := string(fileContent)
-	// Part 1
 	AddFirstAndLastDigit(fileString, 1)
-	// Part 2
-	ReplaceDigitStringByInt(fileString)
+	fileString = ReplaceDigitStringByInt(fileString)
+	AddFirstAndLastDigit(fileString, 2)
 }
