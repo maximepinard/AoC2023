@@ -13,11 +13,11 @@ func main() {
 
 	part1, part2 := 0, 0
 	for i, row := range strings.Split(fileString, "\n") {
-		game := strings.Split(row, `: `)       // Split game number from the rounds
-		rounds := strings.Split(game[1], `; `) // Split each round from the other rounds
+		game := strings.Split(row, ": ")       // Split game number from the rounds
+		rounds := strings.Split(game[1], "; ") // Split each round from the other rounds
 		num := map[string]int{}                // map each game color to a number
 		for _, round := range rounds {
-			colors := strings.Split(round, `, `) // Split each round from the other rounds
+			colors := strings.Split(round, ", ") // Split each round from the other rounds
 			for _, color := range colors {
 				values := strings.Split(color, " ")
 				number, _ := strconv.Atoi(values[0])
