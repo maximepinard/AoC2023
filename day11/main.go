@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math"
+	"math/big"
 	"os"
 	"strings"
 )
@@ -21,118 +21,80 @@ func appendGalaxies(fileString string) [][]string {
 	return galaxies
 }
 
-func expandGalaxies(Galaxies [][]string) [][]string {
+func expandGalaxies(Galaxies [][]string) ([]int, []int) {
 	rowIndex := make([]int, len(Galaxies[0]))
 	colIndex := make([]int, len(Galaxies))
 	for i, row := range Galaxies {
 		for j, cell := range row {
 			if cell == "#" {
-				rowIndex[i]++
-				colIndex[j]++
+				colIndex[i]++
+				rowIndex[j]++
 			}
 		}
 	}
-	fmt.Printf("Expanded row\n")
-	shift := 0
-	for i, row := range rowIndex {
-		if row == 0 {
-			fmt.Println(i + shift)
-			toInsert := createStringArray(len(Galaxies[0]), ".")
-			Galaxies = insertRow(Galaxies, i+shift, toInsert)
-			shift++
-		}
-	}
-	fmt.Printf("Expanded Col\n")
-	shift = 0
-	for j, col := range colIndex {
-		if col == 0 {
-			fmt.Println(j + shift)
-			toInsert := createStringArray(len(Galaxies), ".")
-			Galaxies = insertColumn(Galaxies, j+shift, toInsert)
-			shift++
-		}
-	}
-	return Galaxies
-}
-
-func createStringArray(size int, defaultValue string) []string {
-	result := make([]string, size)
-	for i := range result {
-		result[i] = defaultValue
-	}
-	return result
-}
-
-func insertColumn(matrix [][]string, columnIndex int, column []string) [][]string {
-	result := make([][]string, len(matrix))
-	for i, row := range matrix {
-		newRow := make([]string, len(row)+1)
-		copy(newRow[:columnIndex], row[:columnIndex])
-		newRow[columnIndex] = column[i]
-		copy(newRow[columnIndex+1:], row[columnIndex:])
-		result[i] = newRow
-	}
-	return result
-}
-
-func insertRow(matrix [][]string, rowIndex int, row []string) [][]string {
-	result := make([][]string, len(matrix)+1)
-	copy(result[:rowIndex], matrix[:rowIndex])
-	result[rowIndex] = row
-	copy(result[rowIndex+1:], matrix[rowIndex:])
-	return result
+	fmt.Println("colIndex")
+	fmt.Println(colIndex)
+	fmt.Println("rowIndex")
+	fmt.Println(rowIndex)
+	return colIndex, rowIndex
 }
 
 type Galaxy struct {
-	x, y int
+	x, y *big.Int
 }
 
-func CalculateShortestPaths(Galaxies [][]string) {
-	TheGalaxies := []Galaxy{}
+func CalculateShortestPaths(Galaxies [][]string, colIndex []int, rowIndex []int) {
+	TheGalaxiesPart1 := []Galaxy{}
+	TheGalaxiesPart2 := []Galaxy{}
+	shiftY := big.NewInt(0)
+	shiftY_2 := big.NewInt(0)
 	for y, row := range Galaxies {
+		shiftX := big.NewInt(0)
+		shiftX_2 := big.NewInt(0)
+		if colIndex[y] == 0 {
+			shiftY.Add(shiftY, big.NewInt(2-1))
+			shiftY_2.Add(shiftY_2, big.NewInt(1000000-1))
+		}
 		for x, cell := range row {
+			if rowIndex[x] == 0 {
+				shiftX.Add(shiftX, big.NewInt(2-1))
+				shiftX_2.Add(shiftX_2, big.NewInt(1000000-1))
+			}
 			if cell == "#" {
-				TheGalaxies = append(TheGalaxies, Galaxy{x, y})
+				galaxyX := new(big.Int).Add(big.NewInt(int64(x)), shiftX)
+				galaxyY := new(big.Int).Add(big.NewInt(int64(y)), shiftY)
+				galaxyX_2 := new(big.Int).Add(big.NewInt(int64(x)), shiftX_2)
+				galaxyY_2 := new(big.Int).Add(big.NewInt(int64(y)), shiftY_2)
+				TheGalaxiesPart1 = append(TheGalaxiesPart1, Galaxy{galaxyX, galaxyY})
+				TheGalaxiesPart2 = append(TheGalaxiesPart2, Galaxy{galaxyX_2, galaxyY_2})
 			}
 		}
 	}
-	total := 0
-	nbG := len(TheGalaxies)
+	totalPart1 := big.NewInt(0)
+	totalPart2 := big.NewInt(0)
+	nbG := len(TheGalaxiesPart2)
 	for i := 0; i < nbG; i++ {
 		for j := i + 1; j < nbG; j++ {
-			total += shortestPath(TheGalaxies[i], TheGalaxies[j])
+			distance1 := shortestPath(TheGalaxiesPart1[i], TheGalaxiesPart1[j])
+			distance2 := shortestPath(TheGalaxiesPart2[i], TheGalaxiesPart2[j])
+			totalPart1.Add(totalPart1, distance1)
+			totalPart2.Add(totalPart2, distance2)
 		}
 	}
-	fmt.Printf("Part 1 is %d\n", total)
+	fmt.Printf("Part 1 is %d\n", totalPart1)
+	fmt.Printf("Part 2 is %d\n", totalPart2)
 }
 
-func shortestPath(start, end Galaxy) int {
-	deltaX := math.Abs(float64(start.x - end.x))
-	deltaY := math.Abs(float64(start.y - end.y))
-	return int(deltaX + deltaY)
+func shortestPath(start, end Galaxy) *big.Int {
+	deltaX := new(big.Int).Abs(new(big.Int).Sub(start.x, end.x))
+	deltaY := new(big.Int).Abs(new(big.Int).Sub(start.y, end.y))
+	return new(big.Int).Add(deltaX, deltaY)
 }
 
 func main() {
 	fileContent, _ := os.ReadFile("input.txt")
 	fileString := string(fileContent)
-
 	Galaxies := appendGalaxies(fileString)
-	fmt.Printf("Original Galaxy\n")
-	for _, row := range Galaxies {
-		for _, cell := range row {
-			fmt.Printf("%s", cell)
-		}
-		fmt.Printf("\n")
-	}
-	Galaxies = expandGalaxies(Galaxies)
-	fmt.Printf("Expanded Galaxy\n")
-	for _, row := range Galaxies {
-		for _, cell := range row {
-			fmt.Printf("%s", cell)
-		}
-		fmt.Printf("\n")
-	}
-	CalculateShortestPaths(Galaxies)
-
-	// fmt.Println(Galaxies)
+	colIndex, rowIndex := expandGalaxies(Galaxies)
+	CalculateShortestPaths(Galaxies, colIndex, rowIndex)
 }
