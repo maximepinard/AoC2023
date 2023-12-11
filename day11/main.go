@@ -32,10 +32,6 @@ func expandGalaxies(Galaxies [][]string) ([]int, []int) {
 			}
 		}
 	}
-	fmt.Println("colIndex")
-	fmt.Println(colIndex)
-	fmt.Println("rowIndex")
-	fmt.Println(rowIndex)
 	return colIndex, rowIndex
 }
 
