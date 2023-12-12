@@ -1,157 +1,86 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type state struct {
-	pattern string
-	numbers string
-}
-
-var cache = make(map[state]uint64)
-
-func setCache(pattern string, numbers []uint8, value uint64) uint64 {
-	cache[state{pattern, string(numbers)}] = value
-	return value
-}
-
-func count(pattern string, numbers []uint8) uint64 {
-	if len(pattern) == 0 && len(numbers) == 0 {
-		return 1
-	}
-
-	if len(pattern) == 0 {
-		return 0
-	}
-
-	// test cache
-	if value, ok := cache[state{pattern, string(numbers)}]; ok {
-		return value
-	}
-
-	if pattern[0] == '.' {
-		res := count(pattern[1:], numbers)
-		return setCache(pattern, numbers, res)
-	}
-
-	// cut branches
-	var sum uint64
-	for _, n := range numbers {
-		sum += uint64(n)
-	}
-	if uint64(len(pattern)) < sum {
-		res := 0
-		return setCache(pattern, numbers, uint64(res))
-	}
-
-	if pattern[0] == '?' {
-		res := count(pattern[1:], numbers) + count("#"+pattern[1:], numbers)
-		return setCache(pattern, numbers, res)
-	}
-
-	if pattern[0] == '#' {
-		if len(numbers) == 0 {
-			res := 0
-			return setCache(pattern, numbers, uint64(res))
-		}
-
-		n := numbers[0]
-		indexDot := strings.Index(pattern, ".")
-		if indexDot == -1 {
-			indexDot = len(pattern)
-		}
-		if uint64(indexDot) < uint64(n) {
-			// not enough # or ?
-			res := 0
-			return setCache(pattern, numbers, uint64(res))
-		}
-
-		// eat n # or ?
-		remaining := pattern[n:]
-		if len(remaining) == 0 {
-			res := count(remaining, numbers[1:])
-			return setCache(pattern, numbers, res)
-		}
-
-		if remaining[0] == '#' {
-			// fail
-			res := 0
-			return setCache(pattern, numbers, uint64(res))
-		}
-		// remaining[0] == '.' || remaining[0] == '?'
-		// eat first ? since it should be a .
-		res := count(remaining[1:], numbers[1:])
-		return setCache(pattern, numbers, res)
-	}
-	panic("unreachable")
-}
-
-func unfoldPattern(pattern string) string {
-	var res = pattern
-	for i := 0; i < 4; i++ {
-		res = res + "?" + pattern
-	}
-	return res
-}
-
-func unfoldNumbers(numbers []uint8) []uint8 {
-	var res []uint8
-	for i := 0; i < 5; i++ {
-		res = append(res, numbers...)
-	}
-	return res
-}
-
-func ToInt(s string) uint64 {
-	res, _ := strconv.Atoi(s)
-	return uint64(res)
-}
-
-func solve(input string, unfold bool) uint64 {
-	input = strings.TrimSuffix(input, "\n")
-	lines := strings.Split(input, "\n")
-
-	var res uint64
-	for _, line := range lines {
-		fields := strings.FieldsFunc(line, func(r rune) bool { return r == ' ' || r == ',' })
-		var pattern = fields[0]
-		var numbers []uint8
-		for _, field := range fields[1:] {
-			numbers = append(numbers, uint8(ToInt(field)))
-		}
-		if unfold {
-			pattern = unfoldPattern(pattern)
-			numbers = unfoldNumbers(numbers)
-		}
-		res += count(pattern, numbers)
-	}
-
-	return res
-}
-
-func Part1(input string) uint64 {
-	return solve(input, false)
-}
-
-func Part2(input string) uint64 {
-	return solve(input, true)
-}
-
 func main() {
 	start := time.Now()
 	fileContent, _ := os.ReadFile("input.txt")
-	inputDay := string(fileContent)
-	inputDay = strings.ReplaceAll(inputDay, "\r", "")
-	fmt.Println("part1: ", Part1(inputDay))
+	fileString := strings.ReplaceAll(string(fileContent), "\r", "")
+	var part1, part2 uint64
+	for _, line := range strings.Split(fileString, "\n") {
+		split := strings.Fields(line)
+		goal := strings.Split(split[1], ",")
+		numbs := make([]int, len(goal))
+		for i, n := range goal {
+			num, _ := strconv.Atoi(n)
+			numbs[i] = num
+		}
+		res1, res2 := countPossibilities(split[0], numbs)
+		part1 += res1
+		part2 += res2
+	}
+	fmt.Printf("Part 1 is %d\n", part1)
+	fmt.Printf("Part 2 is %d\n", part2)
 	fmt.Println(time.Since(start))
+}
 
-	start = time.Now()
-	fmt.Println("part2: ", Part2(inputDay))
-	fmt.Println(time.Since(start))
+func generateCombinations(s []rune, index int, numbs []int) uint64 {
+	var count uint64
+
+	if index == len(s) {
+		var hashLengths []int
+		currentLength := 0
+		for _, r := range s {
+			if r == '#' {
+				currentLength++
+			} else if currentLength > 0 {
+				hashLengths = append(hashLengths, currentLength)
+				currentLength = 0
+			}
+		}
+		if currentLength > 0 {
+			hashLengths = append(hashLengths, currentLength)
+		}
+		if len(hashLengths) == len(numbs) && reflect.DeepEqual(hashLengths, numbs) {
+			count++
+		}
+		return count
+	}
+
+	if s[index] == '?' {
+		for _, r := range []rune{'.', '#'} {
+			s[index] = r
+			count += generateCombinations(s, index+1, numbs)
+			s[index] = '?'
+		}
+	} else {
+		count += generateCombinations(s, index+1, numbs)
+	}
+	return count
+}
+
+/* func mergeSlices(slices ...[]int) []int {
+	var merged []int
+	for _, s := range slices {
+		merged = append(merged, s...)
+	}
+	return merged
+} */
+
+func countPossibilities(line string, numbs []int) (uint64, uint64) {
+	strRunes := []rune(line)
+	count, count2 := uint64(0), uint64(0)
+	generateCombinations(strRunes, 0, numbs)
+	// Part 2 run forever
+	/* strRunes2 := []rune(line + "?" + line + "?" + line + "?" + line + "?" + line)
+	numbs2 := mergeSlices(numbs, numbs, numbs, numbs, numbs)
+	generateCombinations(strRunes2, 0, numbs2, &count2) */
+	return count, count2
 }
