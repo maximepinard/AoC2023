@@ -66,7 +66,8 @@ func generateCombinations(s []rune, index int, numbs []int) uint64 {
 	return count
 }
 
-/* func mergeSlices(slices ...[]int) []int {
+/*
+func mergeSlices(slices ...[]int) []int {
 	var merged []int
 	for _, s := range slices {
 		merged = append(merged, s...)
@@ -76,11 +77,10 @@ func generateCombinations(s []rune, index int, numbs []int) uint64 {
 
 func countPossibilities(line string, numbs []int) (uint64, uint64) {
 	strRunes := []rune(line)
-	count, count2 := uint64(0), uint64(0)
-	generateCombinations(strRunes, 0, numbs)
+	count := generateCombinations(strRunes, 0, numbs)
 	// Part 2 run forever
 	/* strRunes2 := []rune(line + "?" + line + "?" + line + "?" + line + "?" + line)
 	numbs2 := mergeSlices(numbs, numbs, numbs, numbs, numbs)
-	generateCombinations(strRunes2, 0, numbs2, &count2) */
-	return count, count2
+	count2 := generateCombinations(strRunes2, 0, numbs2) */
+	return count, 0
 }
