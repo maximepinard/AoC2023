@@ -31,8 +31,14 @@ func main() {
 	fmt.Println(time.Since(start))
 }
 
+var cache = make(map[string]uint64)
+
 func generateCombinations(s []rune, index int, numbs []int) uint64 {
 	var count uint64
+	key := string(s) + fmt.Sprintf("%d", numbs)
+	if n, ok := cache[key]; ok {
+		return n
+	}
 
 	if index == len(s) {
 		var hashLengths []int
@@ -51,6 +57,7 @@ func generateCombinations(s []rune, index int, numbs []int) uint64 {
 		if len(hashLengths) == len(numbs) && reflect.DeepEqual(hashLengths, numbs) {
 			count++
 		}
+		cache[key] = count
 		return count
 	}
 
@@ -58,11 +65,14 @@ func generateCombinations(s []rune, index int, numbs []int) uint64 {
 		for _, r := range []rune{'.', '#'} {
 			s[index] = r
 			count += generateCombinations(s, index+1, numbs)
+			cache[key] = count
 			s[index] = '?'
 		}
 	} else {
 		count += generateCombinations(s, index+1, numbs)
+		cache[key] = count
 	}
+	cache[key] = count
 	return count
 }
 
