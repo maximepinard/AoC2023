@@ -15,11 +15,9 @@ func main() {
 	part1, part2 := 0, 0
 	positions := strings.Split(fileString, ",")
 	intPositions := make([]int, len(positions))
-	// convert postions array of string to array of int
 	for i := range positions {
 		intPositions[i], _ = strconv.Atoi(positions[i])
 	}
-	// make a copy of intPositions array of int
 	intPositionsCopy := make([]int, len(intPositions))
 	copy(intPositionsCopy, intPositions)
 	part1 = LoopIntCodes(intPositionsCopy, 12, 2)
@@ -28,7 +26,6 @@ func main() {
 		for j := 0; j <= 99; j++ {
 			noun := i
 			verb := j
-			intPositionsCopy = make([]int, len(intPositions))
 			copy(intPositionsCopy, intPositions)
 			part2 = LoopIntCodes(intPositionsCopy, noun, verb)
 			if part2 == 19690720 {
